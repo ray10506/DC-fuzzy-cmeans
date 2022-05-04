@@ -1,6 +1,6 @@
 # DGC-fuzzy-c-means
 This repository contains codes for the paper:<br>
-### An Effective Dimension– and Correlation-based Fuzzy C-Means Method for Imputing Incomplete Data
+### A New and Effective Dimension– and Grey Theory Correlation-based Fuzzy C-Means Method for Imputing Incomplete Data
 
 ## Environment:<br>
   * At least Python 3.7
