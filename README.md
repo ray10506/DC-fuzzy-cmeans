@@ -1,4 +1,4 @@
-# DC-fuzzy-c-means
+# DGC-fuzzy-c-means
 This repository contains codes for the paper:<br>
 ### An Effective Dimension– and Correlation-based Fuzzy C-Means Method for Imputing Incomplete Data
 
