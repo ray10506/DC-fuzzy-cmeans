@@ -13,7 +13,7 @@ This repository contains codes for the paper:<br>
 
 ## Demo (How to run)
 ```
-python DC_main.py [-d DATASET]
+python DGC_main.py [-d DATASET]
 ```
 * Please put the dataset under /data folder.
 * The default for DATASET is iris dataset.
