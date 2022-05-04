@@ -1,9 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 28 21:18:31 2022
-
-@author: RB505
-"""
 
 
 import random 
@@ -46,7 +40,7 @@ class fuzzy_cmean:
         self.name = name
         self.GT = truth
     
-    def apply_numpy(self, dataset , c_list , missing_index):          #將補好值的col 放一起，準備分群
+    def apply_numpy(self, dataset , c_list , missing_index):         
         for c in c_list:
             for i in range(self.row):
                 self.array[i].append( dataset[i][c] )
@@ -54,7 +48,7 @@ class fuzzy_cmean:
         
         
         
-    def cmean(self):                                              #cluster
+    def cmean(self):                                           
         array = np.array(self.array)
         fcm = FCM(n_clusters = self.k ,error = 0.00001)
         fcm.fit(array)
@@ -101,23 +95,23 @@ class fuzzy_cmean:
         impute = round(impute / K , 5)
         return impute
         
-    def impute_data_bycluster(self,dataset, c_list, complete, missing_index, update = 0):                           #impute
+    def impute_data_bycluster(self,dataset, c_list, complete, missing_index, update = 0):                          
         sub = []
-        for c in c_list:                                        #c 是這次要處理的col            
-            missing_temp = missing_index[c].copy()              #這個 c 的 missing data 的 row index
+        for c in c_list:                                        
+            missing_temp = missing_index[c].copy()            
             missing_temp2 = missing_index[c].copy()     
-            for i in missing_temp:                              #選定要處理哪一個missing data 哪一row
+            for i in missing_temp:                            
                 l = 0
-                tar_clus = self.labels[i]                          #這次要補的missing data的群
+                tar_clus = self.labels[i]                       
                 GRS = []
                 for index,j in enumerate(self.labels):
-                    if j == tar_clus and index not in missing_temp2:       #這個row不可有缺失值
+                    if j == tar_clus and index not in missing_temp2:       
                         GRS.append([index])
-                        for k in complete:                          #迭代完整 data 的 col
+                        for k in complete:                        
                             GRS[l].append(dataset[index][k])
                         l+=1   
                 
-                if len(GRS) == 0:                               #如果這個群全部都是missing data，用整列的平均值補
+                if len(GRS) == 0:                              
                     s = 0
                     num = 0
                     for k in range(self.row):
@@ -211,8 +205,8 @@ class fuzzy_cmean:
         # run cluster analysis and obtain results
         fcm_instance.process()
         clusters = fcm_instance.get_clusters()
-        self.centers = fcm_instance.get_centers()                                    #拿到群心                                
-        membership = fcm_instance.get_membership()                                    #拿到關聯度
+        self.centers = fcm_instance.get_centers()                                                          
+        membership = fcm_instance.get_membership()                                   
         
         self.labels = [0 for i in range(row)]
         for index,i in enumerate(clusters):
@@ -272,7 +266,7 @@ for miss in mis_rate:
     nmi_total = 0
                                                  
     for t in range(50):
-        truth = []                                      #分群的gt
+        truth = []                                      
         num = 0
         attri, dataset , truth, num = read.read_dataset(args.dataset)
         truth = np.array(truth)
@@ -299,29 +293,29 @@ for miss in mis_rate:
             miss_rc.append([r,c])
 
 
-        missing_num = [ [0,i] for i in range(col) ]        # [ [ 每一個col 的 missing data數 , col index] ]
-        missing_index = [ [] for i in range(col) ]          # [ [ 每一個col 的 missing data 的 row index] ] 
+        missing_num = [ [0,i] for i in range(col) ]      
+        missing_index = [ [] for i in range(col) ]        
         
         for i in range(len(dataset)):
-            count = dataset[i].count(-1)                     #計算每一列的miss data
+            count = dataset[i].count(-1)                    
             pos = -1
             for j in range(count):
                 pos = dataset[i].index(-1,pos+1)
                 missing_num[pos][0] += 1
                 missing_index[pos].append(i)
         
-        missing_num.sort(key = lambda x:x[0])               #排續每列miss data數
+        missing_num.sort(key = lambda x:x[0])               
 
     
-        num = 0                                             #第一次mean-filling，有兩個以上的col有一樣的missing data數
+        num = 0                                            
         for index,i in enumerate(missing_num):
             if num!=0:
                 num-=1
                 continue
             temp = index
-            clus_col = [ i[1] ]                                                                 #要補值的col
+            clus_col = [ i[1] ]                                                                
             
-            while( (temp != (col-1))  and (missing_num[temp][0] == missing_num[temp+1][0]) ):   #確認有沒有相同missing data數量的col
+            while( (temp != (col-1))  and (missing_num[temp][0] == missing_num[temp+1][0]) ):   
                 num+=1
                 temp+=1
                 
@@ -330,29 +324,29 @@ for miss in mis_rate:
                 clus_col.append(missing_num[index+j+1][1])
                 
                 
-            if (index == 0) and i[0] != 0:                                              #第一次補值
+            if (index == 0) and i[0] != 0:                                             
                 mis_index = []
                 for l in range(num+1):
                     s = 0
                     count = 0
                     for k in range(row):
                         if dataset[k][missing_num[index + l][1]] != -1:
-                            s  += dataset[k][missing_num[index + l][1]]                   #計算整個col的總和
+                            s  += dataset[k][missing_num[index + l][1]]                 
                             count +=1
                     s /= count
                     for k in missing_index[ missing_num[index + l][1] ]:
-                        dataset[k][missing_num[index + l][1]] = round(s,5)                #用整個col的平均值去補miss data
+                        dataset[k][missing_num[index + l][1]] = round(s,5)               
                         mis_index.append( [ k, missing_num[index + l][1] ] )
                 mis_index.sort(key = lambda x:x[0]) 
             else:
                 fc.impute_data_bycluster(dataset,clus_col,complete,missing_index)
-            fc.apply_numpy(dataset , clus_col , missing_index)                #分群
+            fc.apply_numpy(dataset , clus_col , missing_index)              
             
-            complete.append(i[1])                                                       #補值完成的col
+            complete.append(i[1])                                                       
             for j in range(num):
                 complete.append(missing_num[index+j+1][1])
             
-            #missing_index[i[1]] = []
+          
             
         acc, f1 , nmi= fc.accuracy(dataset)
         acc_total += acc
